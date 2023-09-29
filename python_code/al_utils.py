@@ -10,9 +10,7 @@ import torch.multiprocessing as mp
 from torch.utils.data.distributed import DistributedSampler
 from torch.distributed import init_process_group, destroy_process_group
 from datasets import MyDataset, preprocess_data, train_val_split
-from networks import  Trainer, mlpMod,  weight_reset, small_VGG, VGG, LeNet5, ConvNet
-from resnets import def_resnet
-from losses import partial_loss
+from networks import  Trainer, mlpMod,  weight_reset, small_VGG, VGG, LeNet5, ConvNet, def_resnet, partial_loss
 from questions import entropy_calc, marginal_entropy_calc, Questions
 
 
