@@ -103,78 +103,7 @@ class ToyDataset(Dataset):
         plt.ylim([-2,5])
         plt.legend(ncol=5, fontsize=8, markerscale=5)
     
-class CirDataset(Dataset) :
-    def __init__(self, num_classes = 10, train_bool = True, **kwargs):
-        self.train = train_bool
-        self.dataset_name = 'Circles'
-        self.img_dim = (1,2)
-        self.num_classes = num_classes
-        try :
-            self.size = kwargs['size']
-            if self.size is None : self.size = 1000*num_classes if train_bool else 100*num_classes
-        except :
-            self.size = 1000*num_classes if train_bool else 100*num_classes
-        self.create_data()
-        
-    def create_data(self, size = None):
-        self.class_to_idx = {f'class_{k}' : k for k in range(self.num_classes) }
-        if size is not None:
-            self.size = size
-            
-        elt_per_class = self.size //self.num_classes
-        
-        distances = np.arange(self.num_classes)
-        variances = np.eye(self.num_classes) /10
-        
-        r = np.random.multivariate_normal(distances, variances ,elt_per_class)
-        theta = np.random.uniform(0, 2*np.pi, (elt_per_class,self.num_classes))
-        x, y = r * np.cos(theta), r* np.sin(theta)
-        self.data = np.vstack( [np.hstack([x[:,k:k+1],y[:,k:k+1]]) for k in range(self.num_classes)])
 
-        self.targets = np.arange(self.num_classes).repeat(elt_per_class)
-
-        self.size = self.data.shape[0]
-
-        self.labels = np.zeros((self.size, self.num_classes))
-        for k in range(self.size):
-            self.labels[k,self.targets[k]] = 1.
-
-        p = np.random.permutation(np.arange(self.size))
-        self.data = self.data[p]   # for plots
-        self.labels = self.labels[p]
-        self.targets = self.targets[p]
-        # normalise self.data for trainable uses
-        scaler = preprocessing.StandardScaler()
-        scaler.fit(self.data)
-        self.data_norm = scaler.transform(self.data)
-        self.data_norm = torch.tensor(self.data_norm).float().unsqueeze(1)
-        self.labels = torch.tensor(self.labels)
-        self.targets = torch.tensor(self.targets).int()
-        self.scaler = scaler
-        #self.partial_labels= torch.ones_like(self.labels)
-        
-    #def __getitem__(self,idx):
-    #    return self.data_norm[idx],self.partial_labels[idx], idx
-    
-    def __getitem__(self,idx):
-        return self.data_norm[idx],self.targets[idx].item() #, idx
-    
-    #def update_label(self, idx, new_label):
-    #    self.partial_labels[idx] = new_label
-    
-    def __len__(self):
-        return self.size
-
-    def show(self):
-        #colors = ['red','blue','green','black','deeppink','grey','purple','cyan','orange','darkblue']
-        #colors = np.array(colors)
-        for k in range(self.num_classes):
-            pos = np.where(self.targets==k)[0]
-            plt.scatter(self.data[pos,0],self.data[pos,1], s=0.5, label=f'label {k+1}')
-        plt.title('Circle Dataset visualization')
-        if self.num_classes <11 :
-            plt.legend(ncol=5, fontsize=8, markerscale=5)
-        plt.show()
    
         
 
@@ -214,16 +143,6 @@ class MyDataset(Dataset):
             self.data = datasets.ImageFolder(data_path2, transform=transforms.ToTensor())
 
         
-        elif dataset_name == 'Circles' :
-            try :
-                size = kwargs['size']
-            except :
-                size = None
-            try :
-                num_classes = kwargs['num_classes']
-            except :
-                num_classes = 10
-            self.data = CirDataset(num_classes=num_classes, train_bool = train_bool, size = size)
             
         elif 'TOY' in dataset_name :
             try :

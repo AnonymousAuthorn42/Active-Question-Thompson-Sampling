@@ -129,7 +129,7 @@ class AL_process :
         self.test_data.true_labels()
         self.eval_val = True
 
-        FMQ = Questions(args, hyp_emb_file = None, label_to_idx = self.train_data.class_to_idx)
+        FMQ = Questions(args, label_to_idx = self.train_data.class_to_idx)
         self.CBQ = ContextualBanditsQuestions( args, questions = FMQ )
         self.stats = {'anno_cnt': [0],
                         'partial_cnt' : [],

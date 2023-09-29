@@ -17,9 +17,10 @@ For now, please feel free to use the ```env.yml``` for setting up conda environm
 
 ## Key elements
 Usefull code is in python_code directory.
-- ```train_AQTS.py```: contains the run of main learning algorithm, selecting iteratively samples and questions. DEPRECATED
+- ```train_AQTS.py```: main for AQTS-R and AQTS-CR
+- ```train_AQTS-D.py```: main for AQTS-D
 - ```ALPF.py```: algorithm ALPF from Hu et al. - Active Learning with Partial Feedback, 2018 - http://arxiv.org/abs/1802.07427
--  ```classic_AL.py```: Classic active learning baseline, sample selection availables of least confident sampling, entropy sampling and random sampling
+-  ```classic_AL.py```: Classic active learning baseline, Available heuristics :  Least Confident Sampling, Entropy Sampling, Random Sampling
 - ```networks.py```: network definitions and related operations
 - ```datasets.py```: code for dataset imports
 - ```questions.py```: contains a class computing hierarchies, questions and related contextual vectors
@@ -27,3 +28,7 @@ Usefull code is in python_code directory.
 - ```config.py```: contains all the data / network / bandit setup info
 
 
+## Datasets
+CIFAR datasets will be automatically downloaded when running AQTS 
+Tiny ImageNet must be manually downloaded. You can download the dataset at http://cs231n.stanford.edu/tiny-imagenet-200.zip
+Be aware of your data path correspond to the data_dir in config.py

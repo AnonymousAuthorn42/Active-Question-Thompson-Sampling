@@ -26,12 +26,12 @@ def parse_args():
 
     dataset = parser.add_argument_group('dataset', 'dataset parameters')
     dataset.add_argument('--dataset_name', type=str, default='CIFAR10')
-    dataset.add_argument('--data_dir', type=str, default = '../../external/data')
+    dataset.add_argument('--data_dir', type=str, default = '../data')
     dataset.add_argument('--num_threads', type=int, default=0)
     
     bandit = parser.add_argument_group('bandit', 'bandit generic parameters')
     bandit.add_argument('--mode', type = str, default='bandit')
-    bandit.add_argument('--new_hier', type = bool, default = False)
+    bandit.add_argument('--dag_hier', type = bool, default = True)
     bandit.add_argument('--nu2', type=float, default = 2.25)
     bandit.add_argument('--gamma_forget', type = float, default =1)
     bandit.add_argument('--lambda_regul', type= float, default = 1)
@@ -52,7 +52,7 @@ def parse_args():
     reward.add_argument('--lambda_loc_loss', type=float, default = 0)
 
     arms = parser.add_argument_group('arms', 'arms parameters')
-    arms.add_argument('--contexts', nargs='+', type = str, default=['eig','edc','erc', 'eig_m','ent','lc','lcq2','ent_m','delta_loss','cost'])
+    arms.add_argument('--contexts', nargs='+', type = str, default=['eig','edc','erc', 'eig_m','ent','lc','lcq','ent_m','delta_loss','cost'])
     arms.add_argument('--inactive_arm', type=bool, default =True)
     arms.add_argument('--reject_inactive_rnd_1', type = bool, default = False)
     arms.add_argument('--inactive_zero_context', type = bool, default = True)

@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-import pmath
 from hierarchy import *
 from torch.distributions import Categorical
 
@@ -27,16 +26,15 @@ def marginal_entropy_calc(pr, y=None):
     return - torch.nan_to_num((plogp * y)).sum(-1)
 
 class Questions:
-    def __init__(self, args, hyp_emb_file, label_to_idx, **kwargs):
+    def __init__(self, args, label_to_idx, **kwargs):
         self.args = args
         self.dataset = self.args.dataset_name
-        if self.args.new_hier :
+        if self.args.dag_hier :
             self.node_dicts = {'TOY': TOY_node_dicts,
                         'TOY2': TOY_node_dicts,
                         'FashionMNIST' : FASHIONMNIST_node_dicts_2,
                         'CIFAR10' : CIFAR10_node_dicts_2,
                         'CIFAR100': CIFAR100_node_dicts_2,
-                        'Circles' : TOY_node_dicts,
                         'tiny-imagenet-200' : TIN_node_dict_2}[self.dataset]
             print('second hierarchy selected')
         else :
@@ -45,7 +43,6 @@ class Questions:
                         'FashionMNIST' : FASHIONMNIST_node_dicts,
                         'CIFAR10' : CIFAR10_node_dicts,
                         'CIFAR100': CIFAR100_node_dicts,
-                        'Circles' : TOY_node_dicts,
                         'tiny-imagenet-200' : TIN_node_dict}[self.dataset]
             print('first hierarchy selected')
         self.root = self.args.inactive_arm
@@ -63,12 +60,6 @@ class Questions:
         
         
         self.context_type = args.contexts
-        # get tree hyperbolic embedding
-        file_name = hyp_emb_file
-        if file_name is not None :
-            self.hyp_emb_dict = self.load_HazyResearch_HypEmbedding(file_name)
-        else :
-            self.hyp_emb_dict = None
         self.treeclass_to_ix, self.actualclass_to_treeclass, self.tree_to_actual = compute_hierarchy(self.node_dicts, label_to_idx)
         self.ix_to_treeclass = {self.treeclass_to_ix[k]: k for k in self.treeclass_to_ix}
         self.treeclass_to_actualclass = {self.actualclass_to_treeclass[k]: k for k in self.actualclass_to_treeclass}
@@ -93,15 +84,6 @@ class Questions:
         self.cost_annotation(**kwargs)
         print(self.costs)
 
-    def load_HazyResearch_HypEmbedding(self, file_name):
-        with open(file_name, 'r') as emb:
-            emb_lines = emb.readlines()
-            emb_lines = emb_lines[1:]
-            vector_dict = dict()
-            for idx, line in enumerate(emb_lines):
-                curr_line = line.split(',')[:-1]
-                vector_dict[int(curr_line[0])] = np.asarray(list(map(np.float64, curr_line[1:])))
-        return vector_dict
 
     def generate_binary_questions(self):
         for i in self.tree_to_actual.keys():
@@ -112,23 +94,6 @@ class Questions:
                    self.Q[i-1, self.tree_to_actual[i]] = 1   #i-1 because root is removed
 
 
-    def HypAlignQuestions(self, class_list, weights):
-
-        # get hyp rep for class list
-        x = [self.hyp_emb_dict[self.actualclass_to_treeclass[cl]] for cl in class_list]
-
-        # compute poincare mean
-        poincare_mean = pmath.poincare_weighted_mean(torch.Tensor(x), torch.Tensor(weights))
-
-        # get distance of mean from treeclasses
-        hyp_emb = torch.Tensor(list(self.hyp_emb_dict.values()))
-
-        # output argmin
-        dist_matrix = pmath.dist_matrix(hyp_emb, torch.unsqueeze(poincare_mean, 0))
-        q_hat = torch.argsort(dist_matrix, dim=0)
-        #print('Is it a:', ix_to_treeclass[q_hat[0].item()])
-        #return self.ix_to_treeclass[q_hat[0].item()]
-        return dist_matrix/dist_matrix.max()
     
     def context_generation(self, pr, y_partial, dataset_labels, pr_val, y_val, emb_val, emb):
         dim = y_partial.dim()
@@ -144,8 +109,7 @@ class Questions:
                       'edc' :  (y_partial.numpy().sum(-1) - self.erc(pr,y_partial).T).T, # expected decrease in classes
                       'bias' : np.ones(self.num_questions) if dim ==1 else np.ones((pr.shape[0],self.num_questions)),
                       'lc' : (1 - pr.numpy().max(-1)).repeat(self.num_questions) if dim ==1 else (1 - pr.numpy().max(1)).repeat(self.num_questions).reshape(-1,self.num_questions), # uncertainty of the current prediction
-                      'lcq' : 1 - np.dot(pr, self.Q.T),  # uncertainty on answering yes for each questions
-                      'lcq2' : 1 -np.abs( np.dot(pr,self.Q.T) - np.dot(pr,1-self.Q.T) ),  #uncertainty of the answer (yes or no) for each question
+                      'lcq' : 1 -np.abs( np.dot(pr,self.Q.T) - np.dot(pr,1-self.Q.T) ),  #uncertainty of the answer (yes or no) for each question
                       'n_lab' : y_partial.sum(-1).repeat(self.num_questions) if dim ==1 else y_partial.sum(-1).repeat(self.num_questions).reshape(-1,self.num_questions), #current size of partial class
                       'ent_m' : marginal_entropy_calc(pr, y_partial).numpy().repeat(self.num_questions),
                       'eig_m' : self.marginal_eig(pr,y_partial) if dim>1 else self.marginal_eig(pr.unsqueeze(0), y_partial.unsqueeze(0)).reshape(-1)
