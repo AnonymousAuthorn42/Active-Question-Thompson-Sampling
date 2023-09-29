@@ -1,13 +1,15 @@
-# AQ--internship
+# Active-Question-Thompson-Sampling
 
-## Project Active Question
+## Goal
+
+This public repository shares, for reproducibility and experiments, the code used in the paper :
+"ACTIVE QUESTION LEARNING: LEARNING A PARTIAL ANNOTATION POLICY IN HIERARCHICAL LABEL SPACES"
 
 Our goal is to implement and study an active learning algorithm to partially labelize datasets at the lowest cost.
 We assume all samples in a dataset don't need complete annotation. We use thompson sampling and hierearchical structure on labels to decide which points need complete information and which ones need partial ones.
 
 ## Contributors
-This work is originally designed by Sanjeel Pareck, previously post-doc at Telecom Paris. The following work is updated by Ignacio Laurenty, previously Master 2 intern at Telecom Paris. 
-The work is supervised by Florence d'Alché-Buc and Ekhiñe Irurozki.   
+Anonymous authors
 
 ## Setup
 For now, please feel free to use the ```env.yml``` for setting up conda environment and refer to it for any package versions - it contains several extra packages.
