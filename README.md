@@ -3,7 +3,7 @@
 ## Goal
 
 This public repository shares, for reproducibility and experiments, the code used in the paper :
-"ACTIVE QUESTION LEARNING: LEARNING A PARTIAL ANNOTATION POLICY IN HIERARCHICAL LABEL SPACES"
+"Active Question Learning: learning a partial annotation policy in Hierarchical Label Spaces"
 
 We propose the framework Active Question Learning (AQL), designed for Active Learning with Partial Labels.
 We also propose the code of the algorithms AQTS-D, AQTS-CR and AQTS-R.
